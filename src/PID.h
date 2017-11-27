@@ -41,6 +41,16 @@ public:
   * Calculate the total PID error.
   */
   double TotalError();
+
+  /*
+  * Calculate steering value.
+  */
+  double GetSteering(double cte, double speed);
+
+  /*
+  * Calculate throttle value.
+  */
+  double GetThrottle();
 };
 
 #endif /* PID_H */
