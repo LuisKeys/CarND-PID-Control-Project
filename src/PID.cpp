@@ -1,7 +1,6 @@
 #include "PID.h"
 #include <iostream>
 #include <math.h> 
-#include <sys/time.h>
 
 using namespace std;
 
@@ -10,74 +9,93 @@ using namespace std;
 */
 
 double kp_, ki_, kd_, cte_, prev_cte_, totalError_;
-time_t prev_seconds;
 
 PID::PID() {}
 
 PID::~PID() {}
 
 void PID::Init(double Kp, double Ki, double Kd) {
-	struct timeval tp;	
-	gettimeofday(&tp, NULL);
-	long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-
 	kp_ = Kp;
 	ki_ = Ki;
 	kd_ = Kd;
 	prev_cte_ = 0.0;
-	prev_seconds = (float)ms / 1000.0;
 	totalError_ = 0.0;
 }
 
-double PID::GetSteering(double cte, double speed) {
-	struct timeval tp;	
-	gettimeofday(&tp, NULL);
-	long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-
+double PID::GetSteering(double cte, double speed, double angle) {
+	//Get time
+	const double steering_range = 1.0;
 	double delta_cte, p, i, d, 
-			steering, delta_time, seconds, speed_coef;
+			steering;
 
+	//Update variables
 	cte_ = cte;
 	delta_cte = cte_ - prev_cte_;
-	seconds = (float)ms / 1000.0;
-	delta_time = (seconds - prev_seconds);
-	prev_seconds = seconds;
 	totalError_ += cte_;
-	speed_coef = 7.0 / speed;
 
-	p = -kp_ * cte_ * speed_coef;
-	i = -ki_ * totalError_ *speed_coef;
-	d = 0;
+	//Add more sensibility depending on error
+	double kp = kp_;
+	double kd = kd_;
+	if(fabs(cte) > 0.8)
+		kp *= 1.8;
 
-	if(delta_time > 0.001)
-		d = -kd_ * delta_cte / delta_time * speed_coef;
-	
+	if(fabs(cte) > 0.8)
+		kp *= 1.5;
+
+	//Calculate PID components
+	p = -kp * cte_;
+	i = -ki_ * totalError_;
+	d = -kd * delta_cte;
+
 	steering = p + i + d;
 
-	if(steering > 1)
-		steering = 1;
+	//Limit steering range
+	if(steering > steering_range)
+		steering = steering_range;
 
-	if(steering < -1)
-		steering = -1;
+	if(steering < -steering_range)
+		steering = -steering_range;
 
 	cout << "......" << endl;
-	cout << "speed" << speed << endl;
-	cout << "delta_time" << delta_time << endl;
-	cout << "cte" << cte << endl;
-	cout << "p" << p << endl;
-	cout << "i" << i << endl;
-	cout << "d" << d << endl;
+	cout << "angle=" << angle << endl;
+	cout << "speed=" << speed << endl;
+	cout << "steering=" << steering << endl;
+	cout << "cte=" << cte << endl;
+	cout << "p=" << p << endl;
+	cout << "i=" << i << endl;
+	cout << "d=" << d << endl;
+	//getchar();
 
 	return steering;
 }
 
-double PID::GetThrottle() {
+double PID::GetThrottle(double speed, double throttle_p) {
 	double throttle;
+	//Max speed limit (and desired cruise speed)
+	const double top_speed = 80.0;
+	//Min speed
+	const double min_speed = 30.0;
 
-	throttle = 0.8 * 0.2 / fabs(cte_);
+	throttle = throttle_p;	
+	//Increase throttle to trend to top speed
+	if(speed < top_speed)
+		throttle += 0.1;
+
+	//Set throttle to a small value to decrease speed in case limit is exceeded
+	if(speed >= top_speed)
+		throttle = 0.4;
+
+	if(fabs(cte_) > 0.7 && speed > min_speed)
+		throttle = -0.4;
+
+	//Keep throttle within range
 	if(throttle > 0.8)
 		throttle = 0.8;
 
+	if(throttle < -1.0)
+		throttle = -1.0;
+
+	cout << "throttle=" << throttle << endl;
 	return throttle;
 }
 

@@ -45,12 +45,12 @@ public:
   /*
   * Calculate steering value.
   */
-  double GetSteering(double cte, double speed);
+  double GetSteering(double cte, double speed, double angle);
 
   /*
   * Calculate throttle value.
   */
-  double GetThrottle();
+  double GetThrottle(double speed, double throttle_p);
 };
 
 #endif /* PID_H */
