@@ -25,6 +25,7 @@ void PID::Init(double Kp, double Ki, double Kd) {
 double PID::GetSteering(double cte, double speed, double angle) {
 	//Get time
 	const double steering_range = 1.0;
+	const double speed_coef = 50.0;
 	double delta_cte, p, i, d, 
 			steering;
 
@@ -32,20 +33,12 @@ double PID::GetSteering(double cte, double speed, double angle) {
 	cte_ = cte;
 	delta_cte = cte_ - prev_cte_;
 	totalError_ += cte_;
-
-	//Add more sensibility depending on error
-	double kp = kp_;
-	double kd = kd_;
-	if(fabs(cte) > 0.8)
-		kp *= 1.8;
-
-	if(fabs(cte) > 0.8)
-		kp *= 1.5;
+	prev_cte_ = cte_;
 
 	//Calculate PID components
-	p = -kp * cte_;
+	p = -kp_ * cte_ * speed_coef / (speed + speed_coef); 
 	i = -ki_ * totalError_;
-	d = -kd * delta_cte;
+	d = -kd_ * delta_cte * speed_coef / (speed + speed_coef);
 
 	steering = p + i + d;
 
@@ -56,15 +49,16 @@ double PID::GetSteering(double cte, double speed, double angle) {
 	if(steering < -steering_range)
 		steering = -steering_range;
 
-	cout << "......" << endl;
-	cout << "angle=" << angle << endl;
-	cout << "speed=" << speed << endl;
-	cout << "steering=" << steering << endl;
-	cout << "cte=" << cte << endl;
-	cout << "p=" << p << endl;
-	cout << "i=" << i << endl;
-	cout << "d=" << d << endl;
-	//getchar();
+	if(fabs(cte_) > 1.0) {
+		cout << "......" << endl;
+		cout << "angle=" << angle << endl;
+		cout << "speed=" << speed << endl;
+		cout << "steering=" << steering << endl;
+		cout << "cte=" << cte << endl;
+		cout << "p=" << p << endl;
+		cout << "i=" << i << endl;
+		cout << "d=" << d << endl;
+	}
 
 	return steering;
 }
@@ -72,9 +66,9 @@ double PID::GetSteering(double cte, double speed, double angle) {
 double PID::GetThrottle(double speed, double throttle_p) {
 	double throttle;
 	//Max speed limit (and desired cruise speed)
-	const double top_speed = 80.0;
+	const double top_speed = 100.0;
 	//Min speed
-	const double min_speed = 30.0;
+	const double min_speed = 25.0;
 
 	throttle = throttle_p;	
 	//Increase throttle to trend to top speed
@@ -85,17 +79,17 @@ double PID::GetThrottle(double speed, double throttle_p) {
 	if(speed >= top_speed)
 		throttle = 0.4;
 
-	if(fabs(cte_) > 0.7 && speed > min_speed)
-		throttle = -0.4;
+	if(fabs(cte_) > 1.8 && speed > min_speed)
+		throttle = -0.5;
 
 	//Keep throttle within range
-	if(throttle > 0.8)
-		throttle = 0.8;
+	if(throttle > 0.9)
+		throttle = 0.9;
 
 	if(throttle < -1.0)
 		throttle = -1.0;
 
-	cout << "throttle=" << throttle << endl;
+	//cout << "throttle=" << throttle << endl;
 	return throttle;
 }
 
