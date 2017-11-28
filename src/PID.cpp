@@ -49,6 +49,7 @@ double PID::GetSteering(double cte, double speed, double angle) {
 	if(steering < -steering_range)
 		steering = -steering_range;
 
+	/*
 	if(fabs(cte_) > 1.0) {
 		cout << "......" << endl;
 		cout << "angle=" << angle << endl;
@@ -59,6 +60,7 @@ double PID::GetSteering(double cte, double speed, double angle) {
 		cout << "i=" << i << endl;
 		cout << "d=" << d << endl;
 	}
+	*/
 
 	return steering;
 }
