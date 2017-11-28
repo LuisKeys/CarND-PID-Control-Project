@@ -66,9 +66,9 @@ double PID::GetSteering(double cte, double speed, double angle) {
 double PID::GetThrottle(double speed, double throttle_p) {
 	double throttle;
 	//Max speed limit (and desired cruise speed)
-	const double top_speed = 100.0;
+	const double top_speed = 80.0;
 	//Min speed
-	const double min_speed = 25.0;
+	const double min_speed = 20.0;
 
 	throttle = throttle_p;	
 	//Increase throttle to trend to top speed
@@ -79,12 +79,12 @@ double PID::GetThrottle(double speed, double throttle_p) {
 	if(speed >= top_speed)
 		throttle = 0.4;
 
-	if(fabs(cte_) > 1.8 && speed > min_speed)
+	if(fabs(cte_) > 1.4 && speed > min_speed)
 		throttle = -0.5;
 
 	//Keep throttle within range
-	if(throttle > 0.9)
-		throttle = 0.9;
+	if(throttle > 0.8)
+		throttle = 0.8;
 
 	if(throttle < -1.0)
 		throttle = -1.0;
