@@ -3,6 +3,31 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## Project notes:
+1) Parameters selection: Parameters were manually selected, first tunning Proportional coeficienty, 
+and leaving Ki and Kd in 0. Then Kd was added, and Ki was left in 0.0 because there is no BIAS 
+required by this model.
+
+2) Problems and solutions:
+Main problem was oscilation and car getting out of the track. I tried many things, 
+but got better results working with throttle, getting the car to brake anytime 
+the CTE value was larger than 1.4 and speed was larger than 20 mph.
+Top speed was defined as 70.0 mph, throttle increments in 0.1 and max throttle 
+value was 0.6, this way the car accelerates and breaks smoother.
+
+Another improvement was to add the speed as a factor to decrease the sensitivity 
+of P and I elements using this formula:
+
+	p = -kp_ * cte_ * speed_coef / (speed + speed_coef); 
+	i = -ki_ * totalError_;
+	d = -kd_ * delta_cte * speed_coef / (speed + speed_coef);
+
+Where speed_coef is equal to 30, and this improve car stability 
+at higher speeds.
+
+With all this settings car can self drive through the track non stop,
+and without risky turns :)
+
 ## Dependencies
 
 * cmake >= 3.5
