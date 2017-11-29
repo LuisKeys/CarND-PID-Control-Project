@@ -25,7 +25,7 @@ void PID::Init(double Kp, double Ki, double Kd) {
 double PID::GetSteering(double cte, double speed, double angle) {
 	//Get time
 	const double steering_range = 1.0;
-	const double speed_coef = 50.0;
+	const double speed_coef = 30.0;
 	double delta_cte, p, i, d, 
 			steering;
 
@@ -68,7 +68,7 @@ double PID::GetSteering(double cte, double speed, double angle) {
 double PID::GetThrottle(double speed, double throttle_p) {
 	double throttle;
 	//Max speed limit (and desired cruise speed)
-	const double top_speed = 80.0;
+	const double top_speed = 70.0;
 	//Min speed
 	const double min_speed = 20.0;
 
@@ -85,8 +85,8 @@ double PID::GetThrottle(double speed, double throttle_p) {
 		throttle = -0.5;
 
 	//Keep throttle within range
-	if(throttle > 0.8)
-		throttle = 0.8;
+	if(throttle > 0.6)
+		throttle = 0.6;
 
 	if(throttle < -1.0)
 		throttle = -1.0;
