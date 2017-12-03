@@ -28,6 +28,39 @@ at higher speeds.
 With all this settings car can self drive through the track non stop,
 and without risky turns :)
 
+## Description of the 3 temrs of this controller: P (Proportional) - I (Integral) - D (Derivative),
+and their influence in this particular project:
+
+*P (Proportional) Term: Proportional control considers error and trend to react in a direct proportion,
+trending to 0 but in the case of the car it always overshooted, and with big coeficients, it event 
+went out of track even before the first turn. So it is a great controller because it reacts fast and 
+considers the error, but it always oscillates meaning it cannot be used alone for real vehicle applications.
+I started setting the other 2 coeficients (Kd and Ki) in 0.0 and decreasing the value of KP, 
+until its oscillations were minimized. Anyway the car couldn't even do the first turn 
+without going out of the track.
+My intuition is that this model may be compared to a mechanical spring.
+Regarding the gains values,  high proportional gain results in a large amplification of the error 
+in the output making the system to become unstable. A small gain results in a small output response 
+to a large input error which makes the system much less responsive.
+
+*D (Derivative) Term: This term is not considering the error, but its variation, hence this controller
+allone cannot make the error to 0, instead it trends to flatten the error variations into an error line.
+My intuition on this one is, for a mechanical model, that it behaves as a shock absorber. I noticed that this 
+model was perfect to stabilize the propostional term, reducing overshoot, and also that it requires 
+bigger coefficient values.
+I started with small values (in the order of the proportional KP) but it was not until it was 15 times larger
+that is started to make the system more stable.
+
+*I (Integral) Term: This term considers the accumulation of the error over time, which may correct errors that 
+persists, correcting for example a bad alignment in the wheels of the car, which is not the case of this model.
+In fact it didn't help to get good results in this project. I left this parameter (Ki) with a value of 0.0
+until I was satisfied with the values of Kp and Kd (in that order), and then added big values first 
+(which produced unestability) and reducing to tiny values later 
+(which produced no influence at all during a complete turn of the track).
+The basic idea for this term is to eliminate the residual error that occurs with a proportional controller. 
+But it must be used carefully, because accumulated errors 
+can generate undesired results as agressive movements prompting overshoot and oscillation.
+
 ## Dependencies
 
 * cmake >= 3.5
